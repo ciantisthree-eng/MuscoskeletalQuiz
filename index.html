@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skeletal System Review (100 Qs)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for the cute, modern, pastel background */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f9ff; /* Light sky blue */
+            background-image: radial-gradient(#fef2f2 1px, transparent 1px), radial-gradient(#f0f9ff 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+        }
+
+        /* Colors for feedback */
+        /* CORRECT: Green */
+        .correct-answer {
+            background-color: #D1FAE5 !important; /* Light Green for container */
+            border-color: #059669 !important; /* Green border */
+            color: #059669 !important; /* Green text */
+            font-weight: 700;
+        }
+        /* WRONG: Purple */
+        .wrong-answer {
+            background-color: #F3E8FF !important; /* Light Purple/Lavender for container */
+            border-color: #9333EA !important; /* Purple border */
+            color: #9333EA !important; /* Purple text */
+            font-weight: 700;
+        }
+        /* Highlighting the missed correct answer (Still Green) */
+        .highlight-correct {
+            background-color: #D1FAE5 !important;
+            border-color: #059669 !important;
+            color: #059669 !important;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 sm:p-8 flex justify-center items-start">
+
+    <div id="quiz-container" class="w-full max-w-4xl bg-white rounded-2xl shadow-2xl p-6 sm:p-10 border border-gray-100">
+
+        <!-- Score & Status Header -->
+        <header class="mb-6 sticky top-0 bg-white z-10 p-2 rounded-xl shadow-lg border border-indigo-100">
+            <h1 class="text-2xl sm:text-3xl font-bold text-indigo-700 mb-2">Skeletal System Review</h1>
+            <div id="score-display" class="flex justify-between text-lg font-semibold">
+                <p>Question: <span id="current-q">1</span> / 100</p>
+                <p>Correct: <span id="correct-count" class="text-green-600">0</span></p>
+                <p>Incorrect: <span id="incorrect-count" class="text-red-600">0</span></p>
+            </div>
+        </header>
+
+        <!-- Question Area -->
+        <div id="question-area" class="mb-6">
+            <p id="question-text" class="text-xl font-medium text-gray-800 mb-6"></p>
+
+            <!-- Options Grid -->
+            <div id="options-container" class="grid gap-4 sm:grid-cols-2">
+                <!-- Options injected here by JS -->
+            </div>
+        </div>
+
+        <!-- Feedback Area -->
+        <div id="feedback-area" class="mt-8 p-4 hidden rounded-lg transition-all duration-300">
+            <h3 id="feedback-title" class="text-xl font-bold mb-2"></h3>
+            <p id="feedback-summary" class="text-gray-700"></p>
+        </div>
+
+        <!-- Next Button -->
+        <button id="next-button" onclick="nextQuestion()" class="mt-8 w-full py-3 bg-indigo-500 text-white font-bold rounded-xl shadow-md hover:bg-indigo-600 transition duration-150 ease-in-out hidden" disabled>
+            Next Question
+        </button>
+
+        <!-- Quiz Completion Message -->
+        <div id="completion-message" class="text-center py-12 hidden">
+            <h2 class="text-3xl font-bold text-indigo-700 mb-4">Quiz Complete! 🎉</h2>
+            <p class="text-xl text-gray-700">You finished the review. Check your total score above!</p>
+            <button onclick="location.reload()" class="mt-6 py-2 px-6 bg-pink-500 text-white font-bold rounded-xl hover:bg-pink-600 transition">Restart Quiz</button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- QUIZ DATA (100 Questions) ---
+        const quizData = [
+            // Q 1-10: Key Terms & Functions
+            { q: "What is the small, fluid-filled sac or cavity situated in tissues where friction would otherwise occur?", options: ["Ligament", "Suture", "Bursa", "Tendon"], answer: "Bursa", summary: "Hint: Think of a small cushion or a 'purse' of fluid (`Bursa` sounds like `purse`) that protects joints from rubbing." },
+            { q: "The tough, fibrous, connective tissue membrane that covers the outside of a long bone is the:", options: ["Endosteum", "Medullary cavity", "Periosteum", "Diaphysis"], answer: "Periosteum", summary: "Hint: This membrane is 'around' (`Peri-`) the bone (`-osteum`). It’s critical for bone nourishment and repair." },
+            { q: "What is the scientific term for a bone-destroying cell?", options: ["Osteocyte", "Osteoblast", "Osteoclast", "Chondrocyte"], answer: "Osteoclast", summary: "Hint: The bone cell that 'chews' or 'crushes' bone tissue is the `-clast` (like demolition)." },
+            { q: "Which function of the skeletal system involves creating blood cells?", options: ["Protection of vital organs", "Support for the body", "Storage of minerals", "Hematopoiesis"], answer: "Hematopoiesis", summary: "Hint: **Hemo-** means blood, and **-poiesis** means to make or create. It's the process occurring in red bone marrow." },
+            { q: "Which term describes the process of cartilage or connective tissue membranes turning into bone tissue?", options: ["Atrophy", "Hypertrophy", "Ossification", "Ambluation"], answer: "Ossification", summary: "Hint: The term literally means 'turning into bone' or bone formation (`Os-` = bone, `-fication` = to make)." },
+            { q: "A short band of tough, flexible, fibrous connective tissue that connects two bones or cartilages is a:", options: ["Tendon", "Suture", "Ligament", "Bursa"], answer: "Ligament", summary: "Hint: Remember **L**igament connects **B**one to **B**one. Tendon connects Muscle to Bone (TMB)." },
+            { q: "What is the decrease in size or wasting away of body tissue usually due to lack of use?", options: ["Hypertrophy", "Ambluation", "Atrophy", "Ossification"], answer: "Atrophy", summary: "Hint: If you don't use it, the tissue starts to **waste away** or shrink (`A-` meaning lack of, `-trophy` meaning nourishment/growth)." },
+            { q: "Synovial fluid is primarily responsible for:", options: ["Connecting muscle to bone", "Lubricating bones in a joint", "Forming the outer layer of the bone", "Producing blood cells"], answer: "Lubricating bones in a joint", summary: "Hint: Think of the **oil** in your car engine. Synovial fluid reduces friction, keeping the joint smooth and pain-free." },
+            { q: "What type of joint is held tightly together by fibrous tissue, such as those between the skull bones?", options: ["Synovial joint", "Cartilage joint", "Articulation", "Suture"], answer: "Suture", summary: "Hint: This joint is completely **immovable** and looks like zig-zag stitching where two bones have grown together." },
+            { q: "An Osteocyte is best described as a:", options: ["Bone-forming cell", "Bone-destroying cell", "Mature bone cell", "Cartilage cell"], answer: "Mature bone cell", summary: "Hint: An **Osteocyte** is the 'citizen' or 'veteran' bone cell, trapped and maintaining the matrix (`-cyte` = cell)." },
+
+            // Q 11-20: Bone Classification & Long Bone Structure
+            { q: "Which of the following is an example of a long bone?", options: ["Vertebrae", "Carpals", "Rib", "Femur"], answer: "Femur", summary: "Hint: The classification is based on shape, not size. **Long bones** are longer than they are wide, with a shaft (diaphysis) and ends (epiphyses)." },
+            { q: "Bones of the wrist (Carpals) are classified as what type of bone?", options: ["Long", "Short", "Flat", "Irregular"], answer: "Short", summary: "Hint: Bones of the wrist and ankle (carpals and tarsals) are typically **cube-shaped** or 'short' bones." },
+            { q: "Bones like the sternum and skull bones are classified as:", options: ["Long bones", "Short bones", "Flat bones", "Irregular bones"], answer: "Flat bones", summary: "Hint: These bones offer protection and broad surfaces for muscle attachment. Think of them as relatively thin, **plate-like** structures." },
+            { q: "The main shaft of a long bone is called the:", options: ["Epiphysis", "Diaphysis", "Periosteum", "Articular cartilage"], answer: "Diaphysis", summary: "Hint: The central, long part of the bone is the **Dia**- (through, apart) part. Remember 'D' for Down the middle." },
+            { q: "Where is the red bone marrow, responsible for blood cell formation, primarily found in adults?", options: ["Medullary cavity of long bones", "Flat bones, vertebrae, and hip bones", "Periosteum", "Compact bone tissue"], answer: "Flat bones, vertebrae, and hip bones", summary: "Hint: In adults, red marrow retreats from the long bone shafts and concentrates in the **core** of the skeleton (axial skeleton parts)." },
+            { q: "The ends of long bones are called the:", options: ["Diaphysis", "Metaphysis", "Epiphysis", "Periosteum"], answer: "Epiphysis", summary: "Hint: The ends are the **Epi**- (on, upon) parts of the bone, capped with cartilage to form joints." },
+            { q: "What fills the medullary cavity of long bones in an adult?", options: ["Red bone marrow", "Yellow bone marrow (fat)", "Cartilage", "Synovial fluid"], answer: "Yellow bone marrow (fat)", summary: "Hint: In the adult shaft, the marrow converts to storage for **energy**, which is mostly fat (hence the 'yellow' color)." },
+            { q: "Which bone classification category do the vertebrae belong to?", options: ["Flat", "Long", "Short", "Irregular"], answer: "Irregular", summary: "Hint: The individual vertebrae have complex, **unique shapes** that don't fit into the simple descriptions of long, short, or flat." },
+            { q: "The outer layer of the epiphysis is composed primarily of:", options: ["Spongy bone", "Yellow marrow", "Compact bone", "Articular cartilage"], answer: "Compact bone", summary: "Hint: While the inside is spongy, the **outside layer** of all bones must be dense and hard to resist external forces." },
+            { q: "If an adult experiences severe blood loss, the yellow bone marrow may be converted to:", options: ["Cartilage", "Red bone marrow", "Compact bone", "Periosteum"], answer: "Red bone marrow", summary: "Hint: The body prioritizes blood cell production, making the fat storage area convertible back to the **blood-producing** factory." },
+
+            // Q 21-30: Ossification & Growth
+            { q: "The replacement of thin connective tissue membrane with bone is characteristic of which type of ossification?", options: ["Endochondral ossification", "Intramembranous ossification", "Bone remodeling", "Bone resorption"], answer: "Intramembranous ossification", summary: "Hint: This process starts directly in a fibrous **membrane** (`Intra-` = within, `membranous` = membrane), common for flat bones like the skull." },
+            { q: "Which bones are formed through Endochondral ossification?", options: ["Flat bones of the skull", "All long and short bones", "Only irregular bones", "Bones of the vertebral column only"], answer: "All long and short bones", summary: "Hint: This process starts with a **cartilage** model (`Chondral` = cartilage) that is replaced by bone. This is how long bones grow." },
+            { q: "Bones grow taller primarily at the:", options: ["Diaphysis", "Medullary cavity", "Epiphyseal plate", "Periosteum"], answer: "Epiphyseal plate", summary: "Hint: This area is often called the **growth plate**. It is located between the diaphysis and the epiphysis." },
+            { q: "Which cell is primarily responsible for increasing bone width (appositional growth)?", options: ["Osteoclast (inside)", "Osteoblast (inside)", "Osteoclast (outside)", "Osteoblast (outside)"], answer: "Osteoblast (outside)", summary: "Hint: Remember, to build width, you need to **deposit** bone (`-blast`) on the outer surface (under the periosteum)." },
+            { q: "What condition results from too much growth hormone (hypersecretion) during childhood?", options: ["Dwarfism", "Acromegaly", "Gigantism", "Osteoporosis"], answer: "Gigantism", summary: "Hint: **Hyper-** means excessive. Excessive growth hormone makes someone an over-sized **giant**." },
+            { q: "Bone resorption, a key part of remodeling, is the process by which osteoclasts:", options: ["Deposit new bone tissue", "Produce blood cells", "Break down bone tissue, releasing minerals", "Convert cartilage to bone"], answer: "Break down bone tissue, releasing minerals", summary: "Hint: Resorption involves **releasing** minerals like calcium back into the blood by breaking down the bone matrix." },
+            { q: "The combined action of bone deposition and bone resorption is called:", options: ["Ossification", "Hypertrophy", "Bone Remodeling", "Articular Growth"], answer: "Bone Remodeling", summary: "Hint: This is the constant process of **re-shaping** and maintenance that occurs throughout your life." },
+            { q: "Low levels of growth hormone (hyposecretion) can lead to which condition?", options: ["Giantism", "Type Dwarfism", "Osteoporosis", "Kyphosis"], answer: "Type Dwarfism", summary: "Hint: **Hypo-** means low or insufficient. Low hormone means insufficient long bone growth." },
+            { q: "What two minerals are mainly deposited in bone tissue by Osteoblasts?", options: ["Sodium and Potassium", "Calcium and Phosphate", "Iron and Magnesium", "Sulfate and Chloride"], answer: "Calcium and Phosphate", summary: "Hint: These two elements form the hard crystalline structures (hydroxyapatite) that give bone its **rigidity**." },
+            { q: "Bone remodeling is influenced by what two main factors, according to the slide?", options: ["Diet and sleep", "Calcium and stress", "Age and gender", "Temperature and hydration"], answer: "Calcium and stress", summary: "Hint: The body must balance the needs of the **blood** (calcium levels) and the needs of **gravity/muscle pull** (stress)." },
+
+            // Q 31-40: Bone Markings & Axial Skeleton (Cranium)
+            { q: "A rounded process that usually articulates with another bone, like those on the occipital bone, is a:", options: ["Fossa", "Condyle", "Foramen", "Meatus"], answer: "Condyle", summary: "Hint: Think of a knuckle. The **Condyle** is a smooth, rounded projection that functions as a part of a joint." },
+            { q: "A narrow, slit-like opening for blood vessels or nerves is defined as a:", options: ["Meatus", "Fossa", "Fissure", "Sinus"], answer: "Fissure", summary: "Hint: Imagine a **long, narrow crack** in the bone where tissues pass through." },
+            { q: "The term for a small, flattened surface on a bone, such as those on a vertebra, is a:", options: ["Tubercle", "Facet", "Trochlea", "Crest"], answer: "Facet", summary: "Hint: This small, smooth surface forms a minor joint. Think of a tiny **face** on the bone." },
+            { q: "A rounded opening through a bone is called a:", options: ["Meatus", "Foramen", "Sinus", "Fissure"], answer: "Foramen", summary: "Hint: This is a classic **hole** in the bone, often associated with the passage of the spinal cord (e.g., *foramen magnum*)." },
+            { q: "Which cranial bone contains the external auditory meatus and zygomatic process?", options: ["Frontal bone", "Occipital bone", "Temporal bone", "Sphenoid bone"], answer: "Temporal bone", summary: "Hint: This bone is located near the **temples** and houses the structures of the ear and temporal muscle attachments." },
+            { q: "The cranium is composed of how many main bones?", options: ["14", "8", "12", "6"], answer: "8", summary: "Hint: There are **8** bones in the brain case (Cranium) and 14 in the face (Facial bones)." },
+            { q: "The butterfly-shaped bone that forms the floor of the cranium and houses the Sella Turcica is the:", options: ["Frontal bone", "Occipital bone", "Temporal bone", "Sphenoid bone"], answer: "Sphenoid bone", summary: "Hint: It's the central **keystone** bone that articulates with all other cranial bones. It looks like a moth or butterfly." },
+            { q: "Which bone forms the back and base of the skull and contains the foramen magnum?", options: ["Parietal bone", "Frontal bone", "Occipital bone", "Ethmoid bone"], answer: "Occipital bone", summary: "Hint: The word **Occipital** means 'back of the head'." },
+            { q: "The soft spots in the infant skull, allowing for brain expansion, are called:", options: ["Sutures", "Fontanels", "Sinuses", "Foramina"], answer: "Fontanels", summary: "Hint: These are the large, membranous 'fountains' or **unossified areas** that eventually become sutures." },
+            { q: "Air-filled cavities lined with mucous membranes that lighten the skull and modulate sound are called:", options: ["Meatuses", "Cranial fossae", "Sinuses", "Sutures"], answer: "Sinuses", summary: "Hint: They are the **hollow cavities** (like the frontal, maxillary) that can fill with mucus when you have a cold." },
+
+            // Q 41-50: Axial Skeleton (Facial, Vertebrae)
+            { q: "How many facial bones are there in the skull?", options: ["8", "12", "14", "22"], answer: "14", summary: "Hint: Remember the phrase: **14** facial bones make up the face (like two maxillae, two zygomatics, etc.)." },
+            { q: "The only movable bone of the entire skull is the:", options: ["Maxilla", "Vomer", "Mandible", "Zygomatic"], answer: "Mandible", summary: "Hint: This bone forms your lower jaw and is essential for **chewing** and talking. It *must* move." },
+            { q: "Which bones form the cheekbones?", options: ["Vomer", "Palatine", "Lacrimal", "Zygomatic"], answer: "Zygomatic", summary: "Hint: The **Zygomatic** arches are the major structures that define the cheeks." },
+            { q: "The first cervical vertebra (C1) is called the:", options: ["Axis", "Atlas", "Thoracic", "Lumbar"], answer: "Atlas", summary: "Hint: The Greek god **Atlas** held up the world; this vertebra holds up the skull." },
+            { q: "The second cervical vertebra (C2), which rotates the head, is called the:", options: ["Atlas", "Axis", "Thoracic", "Cervix"], answer: "Axis", summary: "Hint: This bone has the dens (odontoid process) that acts as a **central pivot point** for head rotation." },
+            { q: "Which section of the vertebral column consists of 12 vertebrae?", options: ["Cervical", "Thoracic", "Lumbar", "Sacral"], answer: "Thoracic", summary: "Hint: There are **12** vertebrae here, which is the same number of **rib pairs** they connect to." },
+            { q: "The strongest, largest, weight-bearing vertebrae are found in the:", options: ["Cervical region", "Thoracic region", "Lumbar region", "Coccyx"], answer: "Lumbar region", summary: "Hint: This section of the spine is in the **lower back**, supporting the entire weight of the torso above it." },
+            { q: "An exaggerated thoracic curve, resulting in a 'hunchback' appearance, is known as:", options: ["Scoliosis", "Lordosis", "Kyphosis", "Spinal Stenosis"], answer: "Kyphosis", summary: "Hint: Think of a **King** or 'K' shape for the hunched appearance." },
+            { q: "Swayback, or an exaggerated lumbar curve, is medically termed:", options: ["Scoliosis", "Lordosis", "Kyphosis", "Spondylosis"], answer: "Lordosis", summary: "Hint: The exaggerated inward curve in the lower back makes you look like a **Lord** or elegant in stature." },
+            { q: "The condition where the vertebral column exhibits a lateral curvature is:", options: ["Kyphosis", "Lordosis", "Scoliosis", "Spina Bifida"], answer: "Scoliosis", summary: "Hint: The spine is curved to the **side** (lateral). Imagine a winding, *S-shaped* road." },
+
+            // Q 51-60: Axial Skeleton (Thoracic Cage) & Appendicular (Girdles)
+            { q: "How many pairs of true ribs are there?", options: ["5", "7", "10", "12"], answer: "7", summary: "Hint: **True ribs** attach **directly** to the sternum. There are **7** pairs, which is a key number for many biological structures." },
+            { q: "The ribs that attach to the costal cartilage of the 7th rib (not directly to the sternum) are called:", options: ["True ribs", "False ribs", "Floating ribs", "Vertebral ribs"], answer: "False ribs", summary: "Hint: These ribs are attached **indirectly** through shared cartilage, so they are 'false' or deceptive." },
+            { q: "The two pairs of ribs that only attach to the thoracic vertebrae are called:", options: ["True ribs", "False ribs", "Floating ribs", "Sternal ribs"], answer: "Floating ribs", summary: "Hint: These ribs have **no anterior attachment** to the sternum or cartilage, making them appear to 'float'." },
+            { q: "The uppermost part of the sternum is the:", options: ["Xiphoid process", "Sternal angle", "Manubrium", "Body"], answer: "Manubrium", summary: "Hint: The **Manubrium** forms the handle or 'tie knot' shape at the top of the sternum." },
+            { q: "The bony landmark found at the bottom of the sternum that serves as an attachment point is the:", options: ["Manubrium", "Sternal notch", "Xiphoid process", "Costal angle"], answer: "Xiphoid process", summary: "Hint: This small, pointed piece is at the **very bottom** of the sternum, sometimes remaining cartilaginous." },
+            { q: "The pelvic girdle is specialized for what primary function?", options: ["Holding bones together", "Providing flexibility to the skeleton", "Protection of organs and weight bearing", "Allowing rapid movement"], answer: "Protection of organs and weight bearing", summary: "Hint: The hips are a sturdy **bowl-like structure** that must support the weight of the entire upper body." },
+            { q: "The hip bone is composed of which three fused bones?", options: ["Femur, Tibia, Fibula", "Ilium, Ischium, Pubis", "Sacrum, Coccyx, Pubis", "Scapula, Clavicle, Humerus"], answer: "Ilium, Ischium, Pubis", summary: "Hint: You can remember the three components with the initials **I.I.P.** (Ilium, Ischium, Pubis)." },
+            { q: "Which part of the pelvic girdle is the most anterior?", options: ["Ilium", "Ischium", "Pubis", "Acetabulum"], answer: "Pubis", summary: "Hint: This bone is located at the **front** and center, meeting the other side at the symphysis pubis." },
+            { q: "The upper extremities are part of the:", options: ["Axial skeleton", "Cranial skeleton", "Appendicular skeleton", "Vertebral column"], answer: "Appendicular skeleton", summary: "Hint: The **Appendicular** skeleton includes the limbs (arms and legs) which are 'appended' to the axial skeleton." },
+            { q: "The pectoral girdle attaches the upper limbs to the axial skeleton and consists of the:", options: ["Ilium and Ischium", "Humerus and Ulna", "Scapulae and Clavicles", "Tibia and Fibula"], answer: "Scapulae and Clavicles", summary: "Hint: This girdle is your shoulder region, composed of the shoulder blades (**scapulae**) and collarbones (**clavicles**)." },
+
+            // Q 61-70: Appendicular Skeleton (Upper Limb)
+            { q: "The single bone of the upper arm is the:", options: ["Ulna", "Radius", "Humerus", "Clavicle"], answer: "Humerus", summary: "Hint: A joke: People who tell bad puns are full of **humor**us!" },
+            { q: "The two bones of the forearm are the:", options: ["Tibia and Fibula", "Humerus and Ulna", "Radius and Ulna", "Metacarpals and Carpals"], answer: "Radius and Ulna", summary: "Hint: These two bones allow you to **rotate** your palm up and down." },
+            { q: "The bones that form the wrist are the:", options: ["Metacarpals", "Tarsals", "Carpals", "Phalanges"], answer: "Carpals", summary: "Hint: The bones of the **Car**pus (wrist) are the **Carpals**." },
+            { q: "The bones that form the palm of the hand are the:", options: ["Metacarpals", "Carpals", "Phalanges", "Tarsals"], answer: "Metacarpals", summary: "Hint: These are the bones **meta-** (after or beyond) the wrist bones (carpals)." },
+            { q: "What is the collective name for the finger and toe bones?", options: ["Metacarpals", "Metatarsals", "Phalanges", "Carpals"], answer: "Phalanges", summary: "Hint: Remember that the entire **Phalange**al column makes up your digits." },
+            { q: "The Olecranon process is a landmark on which bone?", options: ["Humerus", "Radius", "Ulna", "Scapula"], answer: "Ulna", summary: "Hint: The large bony bump at the back of your elbow is the **Olecranon process**, part of the **Ulna**." },
+            { q: "The upper arm bone articulates with the scapula in the:", options: ["Acetabulum", "Glenoid cavity", "Olecranon process", "Sella turcica"], answer: "Glenoid cavity", summary: "Hint: This shallow socket in the shoulder girdle is also called the **Glenohumeral cavity**." },
+            { q: "The large, deep socket in the pelvic bone that articulates with the femur is the:", options: ["Glenoid cavity", "Acetabulum", "Iliac crest", "Symphysis pubis"], answer: "Acetabulum", summary: "Hint: This is the **hip socket**, forming the primary connection between the leg and the pelvis." },
+            { q: "Which bone is located on the thumb side of the forearm?", options: ["Ulna", "Humerus", "Radius", "Carpal"], answer: "Radius", summary: "Hint: When you give a 'thumbs up' gesture, the bone on that side is the **Radius**." },
+            { q: "The joint where the humerus and ulna meet is the:", options: ["Wrist joint", "Shoulder joint", "Elbow joint", "Knee joint"], answer: "Elbow joint", summary: "Hint: The articulation of the humerus, radius, and ulna forms the **Elbow**." },
+
+            // Q 71-80: Appendicular Skeleton (Lower Limb)
+            { q: "The longest and heaviest bone in the human body is the:", options: ["Tibia", "Fibula", "Femur", "Humerus"], answer: "Femur", summary: "Hint: The **Femur** (thigh bone) is so long, you could use a **femer** (finer) measuring tape to check its length!" },
+            { q: "The main weight-bearing bone of the lower leg is the:", options: ["Fibula", "Tibia", "Patella", "Femur"], answer: "Tibia", summary: "Hint: The **Tibia** is the large, anterior shin bone that takes the stress of your **T**oe-to-ground contact." },
+            { q: "The kneecap is the:", options: ["Tibia", "Fibula", "Patella", "Tarsal"], answer: "Patella", summary: "Hint: This is the large, triangular **sesamoid bone** embedded in the quadriceps tendon." },
+            { q: "The small, non-weight-bearing bone of the lower leg is the:", options: ["Tibia", "Femur", "Fibula", "Patella"], answer: "Fibula", summary: "Hint: The **Fibula** is the small, delicate bone on the side. Think 'F' for **Fine** or fragile compared to the Tibia." },
+            { q: "The bones that form the ankle are the:", options: ["Metatarsals", "Tarsals", "Phalanges", "Carpals"], answer: "Tarsals", summary: "Hint: Just like the wrist is the Carpals, the ankle is the **Tarsals**." },
+            { q: "The heel bone, which is the largest of the tarsals, is the:", options: ["Talus", "Cuboid", "Calcaneus", "Navicular"], answer: "Calcaneus", summary: "Hint: The **Calcaneus** is the large bone that forms the **heel** of the foot." },
+            { q: "Which bone forms the ball of the foot (between the ankle and toes)?", options: ["Tarsals", "Phalanges", "Metatarsals", "Calcaneus"], answer: "Metatarsals", summary: "Hint: These are the bones **meta-** (after) the ankle bones (tarsals) but before the toes." },
+            { q: "The arches of the foot function to:", options: ["Provide a base for balance only", "Form the instep and provide shock absorption", "Provide a site for red marrow formation", "Allow for inversion-eversion movement"], answer: "Form the instep and provide shock absorption", summary: "Hint: The arch acts like a flexible **spring** or bow to redistribute body weight and reduce impact force." },
+            { q: "Which joint name refers to the articulation between the tibia and femur?", options: ["Glenohumeral", "Femorotibial (Knee)", "Coxal (Hip)", "Metacarpophalangeal"], answer: "Femorotibial (Knee)", summary: "Hint: This joint name combines the **Femur** and **Tibia** to describe the knee joint." },
+            { q: "Which joint name refers to the articulation between the humerus and ulna/radius?", options: ["Tibiofemoral", "Radiohumeral (Elbow)", "Coxal", "Sacroiliac"], answer: "Radiohumeral (Elbow)", summary: "Hint: This joint name combines the **Radius** and **Humerus** to describe the elbow articulation." },
+
+            // Q 81-90: Types of Joints
+            { q: "Which type of joint is categorized as immovable?", options: ["Freely movable (Synovial)", "Slightly movable", "Fibrous (Immovable)", "Hinge"], answer: "Fibrous (Immovable)", summary: "Hint: **Fibrous joints** are tightly bound by dense connective tissue, meaning **no** movement is possible." },
+            { q: "A slightly movable joint, such as the pubic symphysis, is classified as a:", options: ["Synovial joint", "Cartilaginous joint", "Suture", "Ball-and-socket joint"], answer: "Cartilaginous joint", summary: "Hint: These joints have **cartilage** (fibrocartilage or hyaline) separating the bones, allowing only small movements." },
+            { q: "Which of the following is NOT a component of a freely movable (Synovial) joint?", options: ["Articular cartilage", "Joint capsule", "Bursae", "Epiphyseal plate"], answer: "Epiphyseal plate", summary: "Hint: The **Epiphyseal plate** is a growth structure, found in long bones, and is **not** part of the joint capsule structure." },
+            { q: "The hip and shoulder joints are examples of which type of freely movable joint?", options: ["Hinge", "Pivot", "Ball-and-socket", "Gliding"], answer: "Ball-and-socket", summary: "Hint: These joints allow movement in **all planes** (flexion/extension, abduction/adduction, rotation), like a ball spinning in a cup." },
+            { q: "The knee and elbow joints are examples of which type of freely movable joint?", options: ["Pivot", "Hinge", "Condyloid", "Saddle"], answer: "Hinge", summary: "Hint: These joints, like a **door hinge**, only allow movement in **one plane** (flexion and extension)." },
+            { q: "The joint between the axis (C2) and atlas (C1) that allows head rotation is a:", options: ["Hinge joint", "Pivot joint", "Gliding joint", "Condyloid joint"], answer: "Pivot joint", summary: "Hint: This joint allows you to **turn your head** side to side, or **pivot** it around the dens." },
+            { q: "Which joint type is found in the wrist and allows bones to slide over one another?", options: ["Saddle", "Hinge", "Gliding", "Ball-and-socket"], answer: "Gliding", summary: "Hint: The flat surfaces of the carpals allow them to simply **glide** or slip past each other." },
+            { q: "The thumb joint (carpometacarpal) is a unique example of a:", options: ["Hinge joint", "Pivot joint", "Saddle joint", "Gliding joint"], answer: "Saddle joint", summary: "Hint: The articular surfaces are shaped like a horse's **saddle**, giving your thumb opposition (pinching ability)." },
+            { q: "A joint that allows movement in different planes but prevents rotation (like knuckles) is a:", options: ["Hinge joint", "Condyloid joint", "Pivot joint", "Gliding joint"], answer: "Condyloid joint", summary: "Hint: Also known as an **ellipsoidal** joint, it fits into an elliptical cavity and permits angular motion but no axial rotation." },
+            { q: "What is the dense, protective membrane that covers the joint capsule?", options: ["Synovial membrane", "Articular cartilage", "Periosteum", "Fibrous capsule"], answer: "Fibrous capsule", summary: "Hint: The **Fibrous capsule** is the tough, outer layer that holds the entire joint together." },
+
+            // Q 91-100: Types of Joint Movement
+            { q: "Decreasing the angle between two bones is called:", options: ["Extension", "Flexion", "Hyperextension", "Abduction"], answer: "Flexion", summary: "Hint: Think of **flexing** a muscle, which causes the limb to bend." },
+            { q: "Increasing the angle between two bones is called:", options: ["Flexion", "Extension", "Rotation", "Adduction"], answer: "Extension", summary: "Hint: This is the opposite of flexion—you are **extending** the joint or straightening the limb." },
+            { q: "Moving a limb away from the midline of the body is:", options: ["Adduction", "Abduction", "Circumduction", "Eversion"], answer: "Abduction", summary: "Hint: Think of **abducting** (kidnapping) someone—you are taking them **away** from the center." },
+            { q: "Moving a limb toward the midline of the body is:", options: ["Abduction", "Adduction", "Inversion", "Dorsiflexion"], answer: "Adduction", summary: "Hint: You are **adding** the limb back **toward** the central body line." },
+            { q: "Moving the foot so the sole is facing laterally (outward) is:", options: ["Inversion", "Eversion", "Dorsiflexion", "Plantar flexion"], answer: "Eversion", summary: "Hint: The sole is turned **out**ward, or **E**verted." },
+            { q: "Moving the foot so the sole is facing medially (inward) is:", options: ["Eversion", "Inversion", "Dorsiflexion", "Plantar flexion"], answer: "Inversion", summary: "Hint: The sole is turned **in**ward, or **In**verted." },
+            { q: "Which term describes a movement where the distal end of a limb moves in a circle?", options: ["Rotation", "Circumduction", "Extension", "Inversion"], answer: "Circumduction", summary: "Hint: This movement is a combination of 4 others, tracing a **circumference** or cone shape." },
+            { q: "Lifting the foot towards the shin (flexing the foot upward) is called:", options: ["Plantar flexion", "Dorsiflexion", "Hyperextension", "Eversion"], answer: "Dorsiflexion", summary: "Hint: You are flexing the foot towards the **dorsal** (top) surface." },
+            { q: "Pointing the toes downward (extending the foot) is called:", options: ["Dorsiflexion", "Plantar flexion", "Supination", "Pronation"], answer: "Plantar flexion", summary: "Hint: You are pressing the foot down toward the **plantar** (sole) surface." },
+            { q: "Turning the palm of the hand upward is called:", options: ["Pronation", "Supination", "Inversion", "Eversion"], answer: "Supination", summary: "Hint: You can carry a bowl of **soup** in a **supinated** hand." }
+        ];
+
+        let state = {
+            currentQIndex: 0,
+            correctCount: 0,
+            incorrectCount: 0,
+            hasAnswered: false,
+            quizData: quizData.sort(() => Math.random() - 0.5) // Shuffle the questions
+        };
+
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainerEl = document.getElementById('options-container');
+        const feedbackAreaEl = document.getElementById('feedback-area');
+        const feedbackTitleEl = document.getElementById('feedback-title');
+        const feedbackSummaryEl = document.getElementById('feedback-summary');
+        const nextButtonEl = document.getElementById('next-button');
+        const currentQEl = document.getElementById('current-q');
+        const correctCountEl = document.getElementById('correct-count');
+        const incorrectCountEl = document.getElementById('incorrect-count');
+        const completionMessageEl = document.getElementById('completion-message');
+
+        function renderQuestion() {
+            if (state.currentQIndex >= state.quizData.length) {
+                showCompletion();
+                return;
+            }
+
+            state.hasAnswered = false;
+            feedbackAreaEl.classList.add('hidden');
+            nextButtonEl.classList.add('hidden');
+            nextButtonEl.disabled = true;
+
+            const q = state.quizData[state.currentQIndex];
+
+            // Update header
+            currentQEl.textContent = state.currentQIndex + 1;
+            correctCountEl.textContent = state.correctCount;
+            incorrectCountEl.textContent = state.incorrectCount;
+
+            // Render question text
+            questionTextEl.textContent = `Q${state.currentQIndex + 1}: ${q.q}`;
+
+            // Render options
+            optionsContainerEl.innerHTML = '';
+            // Shuffle options for the current question
+            const shuffledOptions = q.options.sort(() => Math.random() - 0.5);
+
+            shuffledOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.className = 'option-button w-full text-left p-4 rounded-xl border-2 border-indigo-300 bg-white text-gray-800 font-medium hover:bg-indigo-50 transition duration-150 ease-in-out shadow-sm';
+                button.onclick = () => checkAnswer(button, option, q.answer, q.summary);
+                optionsContainerEl.appendChild(button);
+            });
+        }
+
+        function checkAnswer(selectedButton, selectedOption, correctAnswer, summary) {
+            if (state.hasAnswered) return;
+            state.hasAnswered = true;
+
+            const isCorrect = (selectedOption === correctAnswer);
+
+            // Disable all buttons
+            document.querySelectorAll('.option-button').forEach(btn => btn.disabled = true);
+
+            // Apply immediate color-coded feedback
+            if (isCorrect) {
+                state.correctCount++;
+                selectedButton.classList.add('correct-answer');
+                feedbackTitleEl.textContent = 'Correct! (Green)';
+                feedbackTitleEl.classList.add('text-green-600');
+                feedbackTitleEl.classList.remove('text-purple-700');
+            } else {
+                state.incorrectCount++;
+                selectedButton.classList.add('wrong-answer');
+                feedbackTitleEl.textContent = 'Oops, try this hint! (Purple)';
+                feedbackTitleEl.classList.remove('text-green-600');
+                feedbackTitleEl.classList.add('text-purple-700');
+            }
+
+            // Highlight the actual correct answer (in green)
+            document.querySelectorAll('.option-button').forEach(btn => {
+                if (btn.textContent === correctAnswer && !isCorrect) {
+                    // Apply the green highlight-correct class to the correct button if the user got it wrong
+                    btn.classList.add('highlight-correct');
+                }
+            });
+
+            // Display feedback summary (now a hint)
+            feedbackSummaryEl.textContent = summary;
+            feedbackAreaEl.classList.remove('hidden');
+
+            // Set feedback area border/background based on overall outcome
+            feedbackAreaEl.classList.add('border-2', isCorrect ? 'border-green-600' : 'border-purple-700', isCorrect ? 'bg-green-50' : 'bg-purple-50');
+
+
+            // Show next button
+            nextButtonEl.classList.remove('hidden');
+            nextButtonEl.disabled = false;
+
+            // Update score
+            correctCountEl.textContent = state.correctCount;
+            incorrectCountEl.textContent = state.incorrectCount;
+        }
+
+        function nextQuestion() {
+            state.currentQIndex++;
+            feedbackAreaEl.classList.remove('border-2', 'border-green-600', 'border-purple-700', 'bg-green-50', 'bg-purple-50');
+            renderQuestion();
+        }
+
+        function showCompletion() {
+            document.getElementById('question-area').classList.add('hidden');
+            document.getElementById('score-display').classList.add('hidden');
+            document.querySelector('header').classList.remove('shadow-lg');
+            document.querySelector('header').classList.add('mb-12');
+
+            completionMessageEl.classList.remove('hidden');
+        }
+
+        // Start the quiz
+        window.onload = renderQuestion;
+    </script>
+</body>
+</html>
