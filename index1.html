@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>100-Question Muscle Anatomy Interactive Test</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for aesthetic appeal and mobile usability */
+        :root {
+            --primary: #3b82f6; /* blue-500 */
+            --correct: #10b981; /* emerald-500 */
+            --incorrect: #ef4444; /* red-500 */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+        }
+        .quiz-card {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        .option-button {
+            transition: all 0.2s;
+        }
+        .option-button:hover:not(.disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .option-button.selected {
+            border-width: 3px;
+            border-color: var(--primary);
+        }
+        .option-button.correct {
+            background-color: var(--correct);
+            color: white;
+            border-color: var(--correct);
+        }
+        .option-button.incorrect {
+            background-color: var(--incorrect);
+            color: white;
+            border-color: var(--incorrect);
+        }
+        /* Hide scrollbar for aesthetics */
+        .h-full-screen {
+            min-height: 100vh;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full-screen flex items-center justify-center p-4">
+
+    <div id="quiz-container" class="w-full max-w-lg bg-white rounded-xl p-6 md:p-8 quiz-card transition-all duration-300">
+        <!-- Quiz content will be rendered here -->
+        <div class="text-center text-gray-500 py-10">Loading 100 questions...</div>
+    </div>
+
+    <script>
+        // --- QUIZ DATA (100 Questions) ---
+        const quizData = [
+            {
+                question: "Which type of muscle tissue is striated and involuntary, found only in the heart?",
+                options: ["Skeletal", "Smooth", "Cardiac", "Visceral"],
+                answer: "Cardiac",
+                hint: "This muscle tissue is characterized by short, branching cells with intercalated discs, ensuring synchronized contraction.",
+            },
+            {
+                question: "What is the continuous partial contraction of a muscle that helps maintain posture called?",
+                options: ["Tetanus", "Muscle Twitch", "Muscle Tone", "Hypertrophy"],
+                answer: "Muscle Tone",
+                hint: "This constant, low-level contraction is essential for postural support and is not caused by a single strong stimulation.",
+            },
+            {
+                question: "A bundle of skeletal muscle fibers surrounded by perimysium is known as a:",
+                options: ["Myofibril", "Fascicle", "Tendon", "Sarcomere"],
+                answer: "Fascicle",
+                hint: "The perimysium is the connective tissue layer that groups muscle fibers into these bundles.",
+            },
+            {
+                question: "Which term describes the progressive weakness and loss of muscle mass characteristic of certain diseases?",
+                options: ["Hypertrophy", "Atrophy", "Dystrophy", "Contracture"],
+                answer: "Dystrophy",
+                hint: "Muscular Dystrophy is a group of genetic diseases defined by this progressive decline.",
+            },
+            {
+                question: "What is the primary protein filament that is pulled toward the center of the sarcomere during muscle contraction (Sliding Filament Mechanism)?",
+                options: ["Myosin (Thick)", "Actin (Thin)", "Troponin", "Titin"],
+                answer: "Actin (Thin)",
+                hint: "The myosin heads attach to and pull the thin filaments, shortening the sarcomere.",
+            },
+            {
+                question: "What ion is released from the sarcoplasmic reticulum (SR) to allow muscle contraction to begin?",
+                options: ["Sodium ($\text{Na}^+$)", "Potassium ($\text{K}^+$)", "Calcium ($\text{Ca}^{2+}$)", "Chloride ($\text{Cl}^-$)"],
+                answer: "Calcium ($\text{Ca}^{2+}$)",
+                hint: "This ion binds to troponin, moving tropomyosin and exposing the binding sites on actin.",
+            },
+            {
+                question: "What energy source is metabolized first to create ATP for immediate muscle contraction, particularly during anaerobic activity?",
+                options: ["Glycolysis", "Aerobic Respiration", "Creatine Phosphate", "Fatty Acids"],
+                answer: "Creatine Phosphate",
+                hint: "It acts as an energy reserve, quickly transferring a phosphate group to ADP to form ATP.",
+            },
+            {
+                question: "The process of generating energy solely from glucose breakdown without oxygen, leading to lactic acid build-up, is called:",
+                options: ["Aerobic Respiration", "Kreb's Cycle", "Beta Oxidation", "Glycolysis"],
+                answer: "Glycolysis",
+                hint: "This anaerobic process is a major source of energy during inadequate oxygen supply, such as intense exercise.",
+            },
+            {
+                question: "In the context of muscle action, a muscle that opposes the action of the prime mover is the:",
+                options: ["Agonist", "Synergist", "Antagonist", "Fixator"],
+                answer: "Antagonist",
+                hint: "The antagonist muscle often relaxes or lengthens to allow the agonist (prime mover) to contract.",
+            },
+            {
+                question: "The muscle action that moves the insertion point toward the origin is known as:",
+                options: ["Relaxation", "Contraction", "Extension", "Flexion"],
+                answer: "Contraction",
+                hint: "Muscle contraction is the active process where the muscle shortens and pulls on the attached bone.",
+            },
+            {
+                question: "Which muscle is the chief muscle of inhalation, separating the thoracic cavity from the abdominal cavity?",
+                options: ["Intercostals", "Rectus Abdominis", "Diaphragm", "Trapezius"],
+                answer: "Diaphragm",
+                hint: "Its contraction flattens it, increasing the thoracic volume for breathing in.",
+            },
+            {
+                question: "Which of the following muscles is primarily responsible for flexing and rotating the head?",
+                options: ["Masseter", "Trapezius", "Sternocleidomastoid", "Zygomaticus"],
+                answer: "Sternocleidomastoid",
+                hint: "Its name indicates its origin (sternum and clavicle) and insertion (mastoid process).",
+            },
+            {
+                question: "The 'swimmer's muscle', which lowers the shoulders and brings the arm back behind the body, is the:",
+                options: ["Deltoid", "Latissimus Dorsi", "Pectoralis Major", "Serratus Anterior"],
+                answer: "Latissimus Dorsi",
+                hint: "This is a very large muscle on the posterior aspect of the trunk.",
+            },
+            {
+                question: "The main muscle used for mastication (chewing) that closes the jaw and is considered one of the body's strongest is the:",
+                options: ["Orbicularis Oris", "Buccinator", "Frontalis", "Masseter"],
+                answer: "Masseter",
+                hint: "This muscle's function is purely to elevate the mandible (close the mouth).",
+            },
+            {
+                question: "Which facial muscle encircles the eye, assisting in blinking and squinting?",
+                options: ["Frontalis", "Orbicularis Oculi", "Zygomaticus", "Buccinator"],
+                answer: "Orbicularis Oculi",
+                hint: "The name 'Oculi' refers to its proximity and function around the eye.",
+            },
+            {
+                question: "Which shoulder muscle is a common site for an intramuscular injection?",
+                options: ["Trapezius", "Deltoid", "Pectoralis Major", "Teres Minor"],
+                answer: "Deltoid",
+                hint: "Its rounded shape allows for a safe and effective injection site.",
+            },
+            {
+                question: "The muscle group located on the posterior surface of the thigh responsible for leg flexion and thigh extension is the:",
+                options: ["Quadriceps Femoris", "Adductor Group", "Hamstring Group", "Sartorius"],
+                answer: "Hamstring Group",
+                hint: "This group includes the biceps femoris, semitendinosus, and semimembranosus.",
+            },
+            {
+                question: "The most lateral muscle of the quadriceps femoris group is the:",
+                options: ["Vastus Medialis", "Vastus Lateralis", "Rectus Femoris", "Vastus Intermedius"],
+                answer: "Vastus Lateralis",
+                hint: "Lateral means farther from the midline of the body.",
+            },
+            {
+                question: "Which muscle is responsible for everting the foot and supporting the arch?",
+                options: ["Tibialis Anterior", "Gastrocnemius", "Peroneus Longus", "Soleus"],
+                answer: "Peroneus Longus",
+                hint: "The peroneal/fibular muscles are generally associated with eversion and plantar flexion.",
+            },
+            {
+                question: "The 'All or Nothing' response dictates that a single muscle fiber either contracts fully or does not contract at all. What allows a whole muscle to vary its force of contraction?",
+                options: ["Muscle Tone", "Recruitment", "Tetanus", "Atrophy"],
+                answer: "Recruitment",
+                hint: "The motor unit recruits an increasing number of muscle fibers to increase the overall force.",
+            },
+            {
+                question: "A chronic condition caused by repetitive motion resulting in pressure on the median nerve in the wrist is known as:",
+                options: ["Myasthenia Gravis", "Tetanus", "Carpal Tunnel Syndrome", "Muscular Dystrophy"],
+                answer: "Carpal Tunnel Syndrome",
+                hint: "The inflammation occurs in the tunnel formed by the carpal bones and flexor retinaculum.",
+            },
+            {
+                question: "In the NMJ (Neuromuscular Junction), what neurotransmitter diffuses across the synapse to stimulate the muscle fiber?",
+                options: ["Dopamine", "Serotonin", "Acetylcholine ($\text{ACh}$)", "Norepinephrine"],
+                answer: "Acetylcholine ($\text{ACh}$)",
+                hint: "ACh is the primary chemical messenger released by the somatic motor neuron.",
+            },
+            {
+                question: "When naming skeletal muscles, which criterion refers to the use of terms like Deltoid or Trapezius?",
+                options: ["Size", "Origin and Insertion", "Shape", "Location"],
+                answer: "Shape",
+                hint: "The Deltoid is triangular, and the Trapezius is trapezoid-shaped.",
+            },
+            {
+                question: "What is the dense, sheet-like fascia that attaches a muscle to another muscle or to bone (like a flattened tendon)?",
+                options: ["Aponeurosis", "Perimysium", "Endomysium", "Sarcolemma"],
+                answer: "Aponeurosis",
+                hint: "This is a specific form of tendon that is broad and flat.",
+            },
+            {
+                question: "Which disease is a serious bacterial infection that affects the nervous system, leading to painful, sustained muscle contractions, including lockjaw?",
+                options: ["Myasthenia Gravis", "Curare poisoning", "Botulism", "Tetanus"],
+                answer: "Tetanus",
+                hint: "The bacteria produces a neurotoxin that prevents inhibitory signals to the motor neurons.",
+            },
+            {
+                question: "In Aerobic Metabolism, where does the majority of ATP production occur after Glycolysis, involving the Kreb's Cycle and the Electron Removal/Transport Chain?",
+                options: ["Cytoplasm", "Nucleus", "Mitochondria", "Sarcoplasmic Reticulum"],
+                answer: "Mitochondria",
+                hint: "These are often called the 'powerhouses' of the cell, specializing in oxygen-dependent energy production.",
+            },
+            {
+                question: "The Tibialis Anterior muscle is primarily responsible for:",
+                options: ["Dorsiflexion and Eversion of the foot", "Plantar flexion and Inversion of the foot", "Dorsiflexion and Inversion of the foot", "Plantar flexion and Eversion of the foot"],
+                answer: "Dorsiflexion and Inversion of the foot",
+                hint: "It lifts the foot towards the shin (dorsiflexion) and turns the sole inward (inversion).",
+            },
+            {
+                question: "Which action is characteristic of the Sartorius muscle, the longest muscle in the body?",
+                options: ["Extension of the knee", "Abduction of the arm", "Sitting cross-legged position", "Flexion of the ankle"],
+                answer: "Sitting cross-legged position",
+                hint: "It flexes, abducts, and laterally rotates the hip, and flexes the knee.",
+            },
+            {
+                question: "What percentage of muscle mass is estimated to be lost by the age of 80 due to aging (sarcopenia)?",
+                options: ["10%", "25%", "50%", "75%"],
+                answer: "50%",
+                hint: "This condition, known as sarcopenia, results in decreased strength and functional decline in older adults.",
+            },
+            {
+                question: "Which of the following is NOT one of the four major functions of muscle tissue?",
+                options: ["Movement", "Maintain Posture", "Generate Heat", "Produce Hormones"],
+                answer: "Produce Hormones",
+                hint: "Muscle functions include movement, maintaining posture, stabilizing joints, and generating heat.",
+            },
+            {
+                question: "A skeletal muscle is attached to bone by what type of fibrous connective tissue?",
+                options: ["Ligament", "Aponeurosis", "Tendon", "Fascia"],
+                answer: "Tendon",
+                hint: "This structure connects muscle to the bone, while ligaments connect bone to bone.",
+            },
+            {
+                question: "The attachment site of a muscle to the moveable bone is called the:",
+                options: ["Origin", "Insertion", "Tendon", "Fascia"],
+                answer: "Insertion",
+                hint: "The insertion is generally pulled towards the origin during contraction.",
+            },
+            {
+                question: "The structure that surrounds a group of myofibrils within a muscle fiber is the:",
+                options: ["Myosin", "Sarcoplasmic Reticulum", "Perimysium", "Tendon"],
+                answer: "Sarcoplasmic Reticulum",
+                hint: "This specialized endoplasmic reticulum is crucial for storing and releasing calcium.",
+            },
+            {
+                question: "Which type of muscle tissue is non-striated, involuntary, and makes up the walls of organs and blood vessels?",
+                options: ["Skeletal", "Cardiac", "Smooth", "Visceral"],
+                answer: "Smooth",
+                hint: "It is often referred to as visceral muscle and lacks the banded appearance of other muscle types.",
+            },
+            {
+                question: "Unconsciously (involuntarily) controlled and microscopically appearing striated describes which muscle tissue type?",
+                options: ["Skeletal", "Smooth", "Cardiac", "Visceral"],
+                answer: "Cardiac",
+                hint: "The involuntary control distinguishes it from skeletal muscle, despite both being striated.",
+            },
+            {
+                question: "What term describes the increase in muscle size and strength due to resistance training (a desired result of exercise)?",
+                options: ["Atrophy", "Hypertrophy", "Sarcopenia", "Dystrophy"],
+                answer: "Hypertrophy",
+                hint: "This is the opposite of muscle wasting.",
+            },
+            {
+                question: "Which disease is characterized by chronic muscle weakness caused by an autoimmune attack on $\text{ACh}$ receptors at the NMJ?",
+                options: ["Tetanus", "Botulism", "Myasthenia Gravis", "Contracture"],
+                answer: "Myasthenia Gravis",
+                hint: "This results in failure of the motor neuron to effectively activate the muscle fiber.",
+            },
+            {
+                question: "What is the name for the functional unit of a myofibril, extending from one Z line to the next?",
+                options: ["Fascicle", "Muscle Fiber", "Sarcomere", "Myosin Filament"],
+                answer: "Sarcomere",
+                hint: "The shortening of thousands of these units causes muscle contraction.",
+            },
+            {
+                question: "Which protein blocks the myosin-binding sites on actin in a resting muscle?",
+                options: ["Myosin", "Actin", "Troponin", "Tropomyosin"],
+                answer: "Tropomyosin",
+                hint: "Calcium ions must first bind to a different protein complex to move this blocking filament.",
+            },
+            {
+                question: "What substance is broken down to yield the energy (ATP) needed for the myosin head to pivot and detach during the sliding filament mechanism?",
+                options: ["Creatine", "Calcium", "Water", "ATP"],
+                answer: "ATP",
+                hint: "The binding and breakdown of this molecule are necessary for the muscle to relax and reset.",
+            },
+            {
+                question: "During muscle contraction, the thin filaments slide past the thick filaments, causing the sarcomere to:",
+                options: ["Lengthen", "Shorten", "Stay the same length", "Break down"],
+                answer: "Shorten",
+                hint: "This mechanical event is what generates the pulling force of the muscle.",
+            },
+            {
+                question: "What term describes a sustained muscle contraction caused by rapid, repeated stimulation, allowing for the maximum force?",
+                options: ["Twitch", "Tetanus", "Muscle Tone", "Fatigue"],
+                answer: "Tetanus",
+                hint: "This occurs when the muscle fiber does not have time to relax between stimuli.",
+            },
+            {
+                question: "Which phase of energy metabolism involves the $\text{Kreb}'\text{s}$ Cycle and requires oxygen?",
+                options: ["Glycolysis", "Lactic Acid Production", "Creatine Phosphate Metabolism", "Aerobic Metabolism"],
+                answer: "Aerobic Metabolism",
+                hint: "This process generates a much larger amount of ATP than anaerobic processes.",
+            },
+            {
+                question: "When oxygen supply is inadequate, pyruvic acid from glycolysis is converted to:",
+                options: ["Creatine Phosphate", "Water", "Lactic Acid", "Glucose"],
+                answer: "Lactic Acid",
+                hint: "The buildup of this compound is associated with muscle soreness and fatigue during intense anaerobic exercise.",
+            },
+            {
+                question: "What is the primary function of a Synergist muscle?",
+                options: ["To cause the main movement", "To oppose the main movement", "To assist the Agonist/Prime Mover", "To fixate the joint"],
+                answer: "To assist the Agonist/Prime Mover",
+                hint: "These muscles work collaboratively with the prime mover to produce a more effective movement.",
+            },
+            {
+                question: "Which abdominal muscle compresses the abdomen and is the innermost of the flat abdominal muscles?",
+                options: ["External Oblique", "Rectus Abdominis", "Transversus Abdominis", "Erector Spinae"],
+                answer: "Transversus Abdominis",
+                hint: "Its fibers run horizontally, contributing to core stability.",
+            },
+            {
+                question: "The sternocleidomastoid muscle's action includes flexion and rotation of the head. It is named based on its:",
+                options: ["Size and Location", "Shape and Action", "Origin and Insertion", "Number of Origins"],
+                answer: "Origin and Insertion",
+                hint: "The name references the sternum, clavicle, and mastoid process.",
+            },
+            {
+                question: "Which trunk muscle group helps with the extension of the vertebral column (postural support)?",
+                options: ["Abdominals", "Diaphragm", "Erector Spinae", "Intercostals"],
+                answer: "Erector Spinae",
+                hint: "This group runs along the length of the vertebral column.",
+            },
+            {
+                question: "The Buccinator muscle's primary action is to:",
+                options: ["Raise the eyebrows", "Close the mouth (purse the lips)", "Flatten the cheek for chewing/sucking", "Squint the eye"],
+                answer: "Flatten the cheek for chewing/sucking",
+                hint: "It's essential for holding food between the teeth while chewing.",
+            },
+            {
+                question: "Which muscle is known as the 'smiling muscle' because it extends from the corner of the mouth to the cheek/zygomatic bone?",
+                options: ["Frontalis", "Masseter", "Zygomaticus", "Orbicularis Oris"],
+                answer: "Zygomaticus",
+                hint: "It helps to draw the angle of the mouth up and back.",
+            },
+            {
+                question: "Which muscle elevates the eyelid, giving you a surprised look?",
+                options: ["Orbicularis Oculi", "Levator Palpebrae Superioris", "Frontalis", "Temporalis"],
+                answer: "Levator Palpebrae Superioris",
+                hint: "The term 'Levator' implies lifting, and 'Palpebrae' refers to the eyelid.",
+            },
+            {
+                question: "The muscle that shruggs the shoulders and rotates the pectoralis girdle is the:",
+                options: ["Latissimus Dorsi", "Deltoid", "Trapezius", "Teres Major"],
+                answer: "Trapezius",
+                hint: "This large, flat, triangular muscle is named for its shape.",
+            },
+            {
+                question: "Which muscle abducts the arm to a horizontal position and is a common site for an intramuscular injection?",
+                options: ["Biceps Brachii", "Pectoralis Major", "Deltoid", "Triceps Brachii"],
+                answer: "Deltoid",
+                hint: "It forms the rounded contour of the shoulder.",
+            },
+            {
+                question: "The primary muscle on the posterior surface of the upper arm responsible for elbow extension is the:",
+                options: ["Biceps Brachii", "Brachialis", "Triceps Brachii", "Deltoid"],
+                answer: "Triceps Brachii",
+                hint: "Its three heads work to straighten the arm.",
+            },
+            {
+                question: "The common injection site on the thigh is the:",
+                options: ["Rectus Femoris", "Vastus Medialis", "Vastus Lateralis", "Sartorius"],
+                answer: "Vastus Lateralis",
+                hint: "This muscle is often used for injections in infants and is the outer muscle of the quadriceps group.",
+            },
+            {
+                question: "Which large muscle group is located on the anterior thigh and is responsible for leg extension at the knee?",
+                options: ["Hamstrings", "Gluteus Maximus", "Adductor Group", "Quadriceps Femoris"],
+                answer: "Quadriceps Femoris",
+                hint: "The four heads of this group allow you to kick and stand up.",
+            },
+            {
+                question: "The gastrocnemius and soleus muscles are collectively known as the $\text{Achilles}$ tendon group and cause what primary foot action?",
+                options: ["Dorsiflexion", "Inversion", "Plantar Flexion", "Eversion"],
+                answer: "Plantar Flexion",
+                hint: "This is the action used when standing on your toes or pointing your foot downward.",
+            },
+            {
+                question: "Which bone forms the anchor, or non-moveable end, of a muscle?",
+                options: ["Insertion", "Tendon", "Origin", "Fascicle"],
+                answer: "Origin",
+                hint: "This is the more stable of the two attachment points.",
+            },
+            {
+                question: "What component of the sarcomere shortens during contraction?",
+                options: ["A band", "I band", "Z line", "Myosin Filament"],
+                answer: "I band",
+                hint: "This band contains only thin (actin) filaments and decreases in width as the sarcomere shortens.",
+            },
+            {
+                question: "The somatic motor neuron and all the muscle fibers it innervates constitute a:",
+                options: ["Myofibril", "Synapse", "Motor Unit", "Fascicle"],
+                answer: "Motor Unit",
+                hint: "This is the functional unit for the nervous system's control over muscle movement.",
+            },
+            {
+                question: "What term describes muscle wasting due to a lack of nerve stimulation?",
+                options: ["Senile Atrophy", "Dystrophy", "Denervation Atrophy", "Hypertrophy"],
+                answer: "Denervation Atrophy",
+                hint: "This form of atrophy is directly related to paralysis or nerve damage.",
+            },
+            {
+                question: "Contraction is characterized by abnormal fibrous tissue forming in a muscle that 'freezes' it in a flexed position. This condition is called:",
+                options: ["Sarcopenia", "Contracture", "Myasthenia Gravis", "Tetanus"],
+                answer: "Contracture",
+                hint: "This is a form of underuse or disease-related muscle abnormality.",
+            },
+            {
+                question: "In the Sliding Filament Mechanism, what structure does the myosin head rotate and make contact with?",
+                options: ["Troponin", "Actin", "Tropomyosin", "Titin"],
+                answer: "Actin",
+                hint: "This binding forms the 'cross-bridge' that initiates the power stroke.",
+            },
+            {
+                question: "What is the primary role of Glycolysis in providing energy for muscle contraction?",
+                options: ["Long-term endurance", "Immediate, high-intensity energy", "Oxygen transport", "Building muscle proteins"],
+                answer: "Immediate, high-intensity energy",
+                hint: "Glycolysis provides a rapid but limited source of ATP without the need for oxygen.",
+            },
+            {
+                question: "What anatomical term is used for muscles named using terms like 'Maximus,' 'Medius,' and 'Minimus'?",
+                options: ["Location", "Shape", "Size", "Action"],
+                answer: "Size",
+                hint: "These Latin terms are used to describe the relative magnitude of the muscle (e.g., gluteal group).",
+            },
+            {
+                question: "Which abdominal muscle's fibers run primarily inferiorly and medially, forming the 'V' shape on the sides of the core?",
+                options: ["Internal Oblique", "Transversus Abdominis", "Rectus Abdominis", "External Oblique"],
+                answer: "External Oblique",
+                hint: "This is the most superficial of the lateral abdominal wall muscles.",
+            },
+            {
+                question: "The function of the Intercostal muscles is primarily related to:",
+                options: ["Flexion of the trunk", "Shoulder rotation", "Contraction and relaxation for breathing", "Pelvic floor support"],
+                answer: "Contraction and relaxation for breathing",
+                hint: "These muscles are found between the ribs and assist the diaphragm.",
+            },
+            {
+                question: "Which muscle is the prime mover (agonist) for flexing the elbow?",
+                options: ["Triceps Brachii", "Deltoid", "Biceps Brachii", "Pectoralis Major"],
+                answer: "Biceps Brachii",
+                hint: "The name indicates it has two origins and its primary action is flexion of the forearm.",
+            },
+            {
+                question: "The group of muscles that stabilize the arm at the shoulder joint and protect the rotator cuff is the:",
+                options: ["Pectoralis Group", "Trapezius Group", "Rotator Cuff Muscles", "Triceps Group"],
+                answer: "Rotator Cuff Muscles",
+                hint: "Injury to these muscles is common in athletes with repetitive overhead motions.",
+            },
+            {
+                question: "Which of the following describes the function of the Rectus Femoris muscle?",
+                options: ["Leg flexion at the knee and thigh extension", "Leg extension at the knee and thigh flexion", "Plantar flexion of the foot", "Abduction of the hip"],
+                answer: "Leg extension at the knee and thigh flexion",
+                hint: "This is the only quadriceps muscle that crosses both the hip and the knee joint.",
+            },
+            {
+                question: "The Tibialis Posterior muscle primarily assists in:",
+                options: ["Dorsiflexion and Eversion", "Plantar Flexion and Inversion", "Knee extension", "Toe movement"],
+                answer: "Plantar Flexion and Inversion",
+                hint: "This deep muscle helps to stabilize the arch and point the foot.",
+            },
+            {
+                question: "What is the collective name for the muscles located on the posterior of the thigh?",
+                options: ["Quadriceps", "Adductors", "Flexor Group", "Hamstring Group"],
+                answer: "Hamstring Group",
+                hint: "These muscles are antagonists to the quadriceps.",
+            },
+            {
+                question: "Which muscle is the primary extensor of the hip and is the largest of the three gluteal muscles?",
+                options: ["Gluteus Medius", "Gluteus Minimus", "Gluteus Maximus", "Iliopsoas"],
+                answer: "Gluteus Maximus",
+                hint: "Its large size and powerful contraction are essential for climbing stairs and running.",
+            },
+            {
+                question: "What is the layer of connective tissue that separates the muscle into compartments, preventing the spread of injury?",
+                options: ["Tendon", "Perimysium", "Fascia", "Epimysium"],
+                answer: "Fascia",
+                hint: "This general term for tough connective tissue can lead to Compartment Syndrome if swelling occurs.",
+            },
+            {
+                question: "A single, isolated muscle contraction is called a:",
+                options: ["Tetanus", "Muscle Twitch", "Recruitment", "Tone"],
+                answer: "Muscle Twitch",
+                hint: "This is the response of a muscle fiber to a single stimulus.",
+            },
+            {
+                question: "What happens to the $\text{Z}$ lines of a sarcomere when a muscle contracts?",
+                options: ["They move farther apart", "They move closer together", "They remain stationary", "They dissolve"],
+                answer: "They move closer together",
+                hint: "The movement of the $\text{Z}$ lines is evidence of the thin filaments sliding inward.",
+            },
+            {
+                question: "What is the primary role of the thick filament (Myosin) in muscle contraction?",
+                options: ["To be pulled by Actin", "To release Calcium", "To store ATP", "To pull the thin filaments"],
+                answer: "To pull the thin filaments",
+                hint: "The heads of this filament perform the power stroke.",
+            },
+            {
+                question: "The space between the motor neuron and the muscle fiber is called the:",
+                options: ["Synaptic Vesicle", "Myofibril", "Neuromuscular Junction (NMJ)", "Sarcoplasmic Reticulum"],
+                answer: "Neuromuscular Junction (NMJ)",
+                hint: "It's where the chemical signal is transferred from nerve to muscle.",
+            },
+            {
+                question: "What is the fate of $\text{ACh}$ after it stimulates the muscle membrane at the $\text{NMJ}$?",
+                options: ["It is reabsorbed by the neuron", "It is broken down by an enzyme", "It stays bound to the receptor", "It diffuses into the muscle cell"],
+                answer: "It is broken down by an enzyme",
+                hint: "This rapid deactivation is necessary for muscle relaxation and to prevent continuous contraction.",
+            },
+            {
+                question: "A neurotoxin that blocks the release of $\text{ACh}$, causing flaccid paralysis, is:",
+                options: ["Curare", "Botulism (Botox)", "Tetanus", "Myasthenia Gravis"],
+                answer: "Botulism (Botox)",
+                hint: "This toxin is used therapeutically in small doses to relax muscles.",
+            },
+            {
+                question: "Which condition is an effect of the poison Curare?",
+                options: ["Spastic paralysis", "Blocking $\text{ACh}$ receptors", "Muscle hypertrophy", "Stimulating $\text{ACh}$ release"],
+                answer: "Blocking $\text{ACh}$ receptors",
+                hint: "This prevents the nerve signal from reaching the muscle, causing weakness.",
+            },
+            {
+                question: "Which step immediately follows the nerve impulse reaching the $\text{NMJ}$?",
+                options: ["$\text{Ca}^{2+}$ binds to Troponin", "$\text{ACh}$ diffuses and binds to muscle membrane receptors", "$\text{ATP}$ is broken down", "The muscle shortens"],
+                answer: "$\text{ACh}$ diffuses and binds to muscle membrane receptors",
+                hint: "The chemical signal must first bridge the gap between the neuron and the muscle fiber.",
+            },
+            {
+                question: "What is the primary product of Aerobic Metabolism that is used as energy for muscle cells?",
+                options: ["Lactic Acid", "Glucose", "$\text{ATP}$", "Creatine Phosphate"],
+                answer: "$\text{ATP}$",
+                hint: "This is the universal energy currency for cellular activities, including muscle contraction.",
+            },
+            {
+                question: "How does Aerobic Metabolism differ from Glycolysis in $\text{ATP}$ yield?",
+                options: ["Aerobic yields less $\text{ATP}$", "Aerobic is faster but less efficient", "Aerobic yields much more $\text{ATP}$", "Aerobic requires Lactic Acid"],
+                answer: "Aerobic yields much more $\text{ATP}$",
+                hint: "This is why aerobic activity can be sustained for long periods.",
+            },
+            {
+                question: "What muscle term refers to an attachment site that is NOT moveable?",
+                options: ["Insertion", "Agonist", "Origin", "Tendon"],
+                answer: "Origin",
+                hint: "The muscle pulls its insertion toward this fixed point.",
+            },
+            {
+                question: "A muscle named 'Adductor Magnus' is primarily named based on its:",
+                options: ["Size and Location", "Action and Size", "Shape and Location", "Number of Origins and Action"],
+                answer: "Action and Size",
+                hint: "'Adductor' is the action, and 'Magnus' refers to the size.",
+            },
+            {
+                question: "Which facial muscle is responsible for drawing the eyebrows up and giving a surprised look?",
+                options: ["Zygomaticus", "Orbicularis Oculi", "Frontalis", "Temporalis"],
+                answer: "Frontalis",
+                hint: "This muscle covers the forehead region.",
+            },
+            {
+                question: "What muscle closes the mouth, helps to form words, and purses the lips?",
+                options: ["Masseter", "Buccinator", "Orbicularis Oris", "Levator Palpebrae Superioris"],
+                answer: "Orbicularis Oris",
+                hint: "This muscle encircles the mouth.",
+            },
+            {
+                question: "The Temporalis muscle, one of the chewing muscles, is fan-shaped and extends from the temporal bone to the:",
+                options: ["Maxilla", "Zygomatic bone", "Mandible", "Sternum"],
+                answer: "Mandible",
+                hint: "Both the masseter and temporalis share the function of elevating this bone.",
+            },
+            {
+                question: "Which neck muscle helps the sternocleidomastoid with the extension and hyperextension of the head to look up at the sky?",
+                options: ["Frontalis", "Trapezius", "Masseter", "Latissimus Dorsi"],
+                answer: "Trapezius",
+                hint: "This large, diamond-shaped muscle is involved in many head and shoulder movements.",
+            },
+            {
+                question: "What is the name for the most superficial abdominal muscle that runs vertically from the sternum to the pubis?",
+                options: ["External Oblique", "Transversus Abdominis", "Rectus Abdominis", "Internal Oblique"],
+                answer: "Rectus Abdominis",
+                hint: "This muscle is commonly referred to as the 'abs.'",
+            },
+            {
+                question: "The Pectoralis Major muscle's action is to:",
+                options: ["Abduct the arm", "Extend the elbow", "Lower the shoulders and flex the arm", "Shrug the shoulders"],
+                answer: "Lower the shoulders and flex the arm",
+                hint: "This is the large muscle of the upper chest.",
+            },
+            {
+                question: "What muscle is an antagonist to the Biceps Brachii, performing forearm extension?",
+                options: ["Brachialis", "Deltoid", "Triceps Brachii", "Serratus Anterior"],
+                answer: "Triceps Brachii",
+                hint: "Antagonists perform the opposite movement of the prime mover.",
+            },
+            {
+                question: "The Gluteus Medius muscle is a common injection site and is primarily responsible for:",
+                options: ["Hip flexion", "Hip adduction", "Hip extension", "Hip abduction"],
+                answer: "Hip abduction",
+                hint: "This muscle is key for stabilizing the pelvis when walking.",
+            },
+            {
+                question: "Which muscle is part of the Hamstring Group and is located most medially?",
+                options: ["Biceps Femoris", "Semitendinosus", "Vastus Lateralis", "Rectus Femoris"],
+                answer: "Semitendinosus",
+                hint: "You can find this muscle closer to the midline of the body's posterior thigh.",
+            },
+            {
+                question: "The Sartorius muscle is named based on its action, which is: ",
+                options: ["Extension", "Flexion", "Movement to achieve the tailor's (sartor) position", "Adduction"],
+                answer: "Movement to achieve the tailor's (sartor) position",
+                hint: "It helps you to flex and cross your leg over the opposite knee.",
+            },
+            {
+                question: "Which muscle helps the Gastrocnemius and is located deep to it, also causing plantar flexion?",
+                options: ["Tibialis Anterior", "Peroneus Longus", "Soleus", "Sartorius"],
+                answer: "Soleus",
+                hint: "Both this muscle and the gastrocnemius insert into the $\text{Achilles}$ tendon.",
+            },
+            {
+                question: "What type of muscle contraction is involved when the muscle length shortens as tension increases?",
+                options: ["Isometric", "Isotonic (Concentric)", "Isotonic (Eccentric)", "Tetanic"],
+                answer: "Isotonic (Concentric)",
+                hint: "This is the positive phase of a lift, where the muscle overcomes resistance and shortens.",
+            },
+            {
+                question: "Muscle fibers are considered 'on' or 'off' (contracted or relaxed) based on the:",
+                options: ["Level of fatigue", "All or Nothing principle", "Muscle Tone", "Amount of Lactic Acid"],
+                answer: "All or Nothing principle",
+                hint: "This principle applies to a single muscle fiber or a single motor unit.",
+            },
+            {
+                question: "Loss of muscle mass due to aging is scientifically known as:",
+                options: ["Hypertrophy", "Dystrophy", "Contracture", "Sarcopenia"],
+                answer: "Sarcopenia",
+                hint: "This condition begins around age 30 and accelerates after age 60.",
+            },
+            {
+                question: "What substance is necessary for the myosin head to detach from the actin filament?",
+                options: ["Calcium ($\text{Ca}^{2+}$)", "Acetylcholine ($\text{ACh}$)", "ATP", "Lactic Acid"],
+                answer: "ATP",
+                hint: "Without this energy molecule, the muscle enters a state of rigor.",
+            },
+            {
+                question: "The somatic motor neuron that stimulates skeletal muscle originates from the:",
+                options: ["Brain stem", "Spinal cord", "Hypothalamus", "Cerebellum"],
+                answer: "Spinal cord",
+                hint: "The nerve impulse travels directly from this central nervous system component to the muscle.",
+            },
+            {
+                question: "Which term refers to the covering of a single muscle fiber?",
+                options: ["Perimysium", "Epimysium", "Endomysium", "Fascia"],
+                answer: "Endomysium",
+                hint: "This delicate connective tissue wraps around the individual cells.",
+            },
+            {
+                question: "Which muscle is named for its location on the chest and the arrangement of its fibers?",
+                options: ["Deltoid", "Rectus Abdominis", "Pectoralis Major", "Sternocleidomastoid"],
+                answer: "Pectoralis Major",
+                hint: "Pectoralis refers to the location, and its large size is implied by 'Major'.",
+            },
+            {
+                question: "What is the primary role of the $\text{T}$-tubules in a muscle fiber?",
+                options: ["$\text{ATP}$ production", "Calcium storage", "Transmitting the action potential deep into the cell", "Removing Lactic Acid"],
+                answer: "Transmitting the action potential deep into the cell",
+                hint: "These invaginations of the sarcolemma ensure uniform contraction.",
+            },
+            {
+                question: "What type of metabolism occurs when oxygen is present and is necessary for long-duration, lower-intensity activities?",
+                options: ["Anaerobic", "Glycolysis", "Aerobic", "Creatine Phosphate"],
+                answer: "Aerobic",
+                hint: "This is the most efficient method of $\text{ATP}$ production.",
+            },
+            {
+                question: "Which muscle is an antagonist to the Rectus Femoris, causing flexion of the knee?",
+                options: ["Vastus Lateralis", "Gluteus Maximus", "Sartorius", "Biceps Femoris (Hamstring)"],
+                answer: "Biceps Femoris (Hamstring)",
+                hint: "The quadriceps extend the knee, and this muscle group flexes it.",
+            },
+            {
+                question: "What is the most common cause of Rotator Cuff injury?",
+                options: ["Overuse atrophy", "Sudden trauma", "Repetitive overhead motions", "Improper injection technique"],
+                answer: "Repetitive overhead motions",
+                hint: "This is frequently seen in sports like baseball or swimming.",
+            },
+            {
+                question: "Which of the following is an action of the External Oblique muscle?",
+                options: ["Extension of the trunk", "Rotation of the trunk", "Opening the mouth", "Elevation of the ribcage"],
+                answer: "Rotation of the trunk",
+                hint: "The oblique muscles are crucial for twisting motions.",
+            },
+            {
+                question: "The anterior muscles of the forearm primarily perform which action on the wrist, hand, and fingers?",
+                options: ["Extension", "Abduction", "Rotation", "Flexion"],
+                answer: "Flexion",
+                hint: "This group often consists of 'flexor' muscles.",
+            },
+            {
+                question: "Which muscle is responsible for depressing the lower jaw (opening the mouth)?",
+                options: ["Masseter", "Temporalis", "Platysma", "Lateral Pterygoid"],
+                answer: "Platysma",
+                hint: "While not one of the main chewing muscles, this broad neck muscle can help with depression and expression.",
+            },
+            {
+                question: "What component is associated with muscle aging, causing a decline in strength and functional decline?",
+                options: ["Increased muscle fiber count", "Increased capillary density", "Sarcopenia", "Muscle hypertrophy"],
+                answer: "Sarcopenia",
+                hint: "The overall loss of muscle mass is the key factor.",
+            },
+            {
+                question: "The term 'Denervation Atrophy' specifically refers to muscle wasting due to:",
+                options: ["Lack of use in a cast", "Aging", "Lack of nerve stimulation", "Genetic disease"],
+                answer: "Lack of nerve stimulation",
+                hint: "The prefix 'denervation' points to the cause.",
+            },
+            {
+                question: "The medial muscles of the thigh are collectively known as the:",
+                options: ["Quadriceps", "Hamstrings", "Adductor Group", "Flexor Group"],
+                answer: "Adductor Group",
+                hint: "Their primary action is to pull the leg inward toward the midline.",
+            },
+            {
+                question: "Which of the quadriceps muscles originates on the pelvis (ilium) and crosses the hip joint?",
+                options: ["Vastus Medialis", "Vastus Lateralis", "Vastus Intermedius", "Rectus Femoris"],
+                answer: "Rectus Femoris",
+                hint: "This bi-articular nature allows it to flex the hip as well as extend the knee.",
+            },
+            {
+                question: "What is the primary function of the Soleus muscle?",
+                options: ["Dorsiflexion", "Knee flexion", "Plantar flexion", "Toe extension"],
+                answer: "Plantar flexion",
+                hint: "Unlike the gastrocnemius, the soleus does not cross the knee joint.",
+            },
+            {
+                question: "What muscle, named after its shape, is often referred to as the 'triangle' of the shoulder?",
+                options: ["Trapezius", "Deltoid", "Serratus Anterior", "Pectoralis"],
+                answer: "Deltoid",
+                hint: "The Greek letter $\\Delta$ (delta) is a triangle.",
+            },
+            {
+                question: "In the Sliding Filament Mechanism, what happens to the $\text{A}$ band during muscle contraction?",
+                options: ["It widens", "It shortens", "It stays the same width", "It disappears"],
+                answer: "It stays the same width",
+                hint: "This band represents the length of the thick (myosin) filaments, which do not shorten.",
+            },
+            {
+                question: "The chemical signal that transfers information from the neuron to the muscle is:",
+                options: ["Hormone", "Action Potential", "Neurotransmitter", "Calcium wave"],
+                answer: "Neurotransmitter",
+                hint: "Acetylcholine ($\text{ACh}$) is the specific molecule used at the $\text{NMJ}$.",
+            },
+            {
+                question: "What does the term 'Hypertrophy' literally mean in the context of muscle?",
+                options: ["Under-nourishment", "Growth in response to overuse", "Progressive loss of mass", "Abnormal fibrous tissue formation"],
+                answer: "Growth in response to overuse",
+                hint: "This is a desired outcome of 'pumping iron'.",
+            },
+            {
+                question: "Which of the following describes a key role of muscle tissue in maintaining body temperature?",
+                options: ["Insulating the organs", "Generating heat through shivering and metabolism", "Regulating blood flow only", "Storing water"],
+                answer: "Generating heat through shivering and metabolism",
+                hint: "Muscle activity is a major source of heat production for the body.",
+            },
+            {
+                question: "Which term is used for muscles named by the number of origins, such as Biceps and Triceps?",
+                options: ["Size", "Shape", "Number of Heads", "Location"],
+                answer: "Number of Heads",
+                hint: "Biceps means two, and triceps means three.",
+            },
+            {
+                question: "The facial muscle that raises the eyebrows and positions the food between the teeth is the:",
+                options: ["Orbicularis Oculi", "Buccinator", "Zygomaticus", "Frontalis"],
+                answer: "Buccinator",
+                hint: "It flattens the cheek and is active when sucking or blowing.",
+            },
+            {
+                question: "Which muscle is often referred to as the 'praying muscle' due to its action of flexing and rotating the head?",
+                options: ["Trapezius", "Sternocleidomastoid", "Masseter", "Erector Spinae"],
+                answer: "Sternocleidomastoid",
+                hint: "Bilateral contraction causes neck flexion (like looking down in prayer).",
+            },
+            {
+                question: "Which muscle is an antagonist to the Latissimus Dorsi (swimmer's muscle)?",
+                options: ["Triceps Brachii", "Pectoralis Major", "Deltoid", "Serratus Anterior"],
+                answer: "Pectoralis Major",
+                hint: "The Latissimus Dorsi extends the arm, while this muscle flexes it.",
+            },
+            {
+                question: "What muscle, located on the forearm, has its origin on the humerus and inserts on the radius or ulna, assisting with elbow flexion?",
+                options: ["Brachialis", "Deltoid", "Triceps Brachii", "Trapezius"],
+                answer: "Brachialis",
+                hint: "This muscle is synergistic to the biceps in elbow flexion.",
+            },
+            {
+                question: "What is the primary action of the Tibialis Anterior muscle?",
+                options: ["Plantar Flexion", "Dorsiflexion", "Eversion", "Inversion and Eversion"],
+                answer: "Dorsiflexion",
+                hint: "It lifts the foot towards the shin.",
+            },
+            {
+                question: "The lateral group of muscles of the thigh, including the Gluteus Medius and Minimus, are primarily responsible for:",
+                options: ["Hip adduction", "Hip flexion", "Hip rotation", "Hip abduction"],
+                answer: "Hip abduction",
+                hint: "They move the thigh away from the midline of the body.",
+            },
+            {
+                question: "Which disorder is caused by a neurotoxin from Clostridium botulinum that prevents muscle contraction?",
+                options: ["Tetanus", "Myasthenia Gravis", "Botulism", "Carpal Tunnel Syndrome"],
+                answer: "Botulism",
+                hint: "It blocks the release of $\text{ACh}$ at the $\text{NMJ}$, leading to flaccid paralysis.",
+            },
+            {
+                question: "What is the medical term for muscle wasting?",
+                options: ["Dystrophy", "Hypertrophy", "Atrophy", "Sarcopenia"],
+                answer: "Atrophy",
+                hint: "This general term describes the reduction in muscle size and strength.",
+            },
+            {
+                question: "Which part of the sarcomere contains only thick (myosin) filaments?",
+                options: ["A band", "I band", "H zone", "Z line"],
+                answer: "H zone",
+                hint: "This central region of the $\text{A}$ band disappears when the muscle is fully contracted.",
+            },
+            {
+                question: "What provides the immediate electrical impulse to contract the muscle fiber membrane?",
+                options: ["$\text{ACh}$", "Action Potential", "Calcium ion", "$\text{ATP}$"],
+                answer: "Action Potential",
+                hint: "The binding of $\text{ACh}$ triggers this electrical event.",
+            },
+            {
+                question: "The role of the $\text{T}$-tubules is most closely linked to the function of the:",
+                options: ["Mitochondria", "Sarcolemma", "Sarcoplasmic Reticulum", "Nucleus"],
+                answer: "Sarcoplasmic Reticulum",
+                hint: "The action potential from the $\text{T}$-tubule causes the $\text{SR}$ to release its stores.",
+            },
+            {
+                question: "The first step in Aerobic Metabolism, where glucose is broken down to pyruvic acid, is:",
+                options: ["Kreb's Cycle", "Electron Transport Chain", "Glycolysis", "Lactic Acid Production"],
+                answer: "Glycolysis",
+                hint: "This initial step can occur with or without oxygen.",
+            },
+            {
+                question: "What is the primary purpose of the movement function of muscles?",
+                options: ["Stabilizing joints", "Maintaining posture", "Locomotion and manipulation", "Generating heat"],
+                answer: "Locomotion and manipulation",
+                hint: "This function allows you to interact with your environment.",
+            },
+            {
+                question: "A muscle named 'Rectus Femoris' is primarily named based on its:",
+                options: ["Shape and Size", "Direction of fibers and Location", "Action and Origin", "Number of origins"],
+                answer: "Direction of fibers and Location",
+                hint: "'Rectus' means straight, referring to the fiber direction, and 'Femoris' refers to the location.",
+            },
+            {
+                question: "Which term is used for muscles that move the vertebral column (like the Erector Spinae)?",
+                options: ["Muscles of the Abdominal Wall", "Muscles of the Rib Cage", "Muscles of the Vertebral Column", "Muscles of the Girdle"],
+                answer: "Muscles of the Vertebral Column",
+                hint: "These muscles control the movement and stability of the spine.",
+            },
+            {
+                question: "The muscle that lowers the shoulders and pulls the shoulder blade forward, essential for punching and pushing actions, is the:",
+                options: ["Deltoid", "Pectoralis Major", "Serratus Anterior", "Teres Major"],
+                answer: "Serratus Anterior",
+                hint: "It is sometimes called the 'boxer's muscle'.",
+            },
+            {
+                question: "Which of the following forearm muscles is correctly matched with its general function?",
+                options: ["Biceps Brachii: Extension", "Triceps Brachii: Flexion", "Supinators: Turn palm upward", "Pronators: Turn palm upward"],
+                answer: "Supinators: Turn palm upward",
+                hint: "Pronators turn the palm downward.",
+            },
+            {
+                question: "What is the medical name for the major plantar flexor of the foot?",
+                options: ["Tibialis Anterior", "Quadriceps Femoris", "Triceps Surae (Gastrocnemius/Soleus)", "Hamstring Group"],
+                answer: "Triceps Surae (Gastrocnemius/Soleus)",
+                hint: "This collective term refers to the three heads that make up the calf muscles.",
+            },
+            {
+                question: "Which muscle group on the posterior thigh is composed of Semitendinosus, Semimembranosus, and Biceps Femoris?",
+                options: ["Adductor Group", "Quadriceps Group", "Hamstring Group", "Gluteal Group"],
+                answer: "Hamstring Group",
+                hint: "These three muscles share a common action of knee flexion and hip extension.",
+            },
+            {
+                question: "What is the role of Troponin in the initiation of muscle contraction?",
+                options: ["Blocks the binding sites on actin", "Binds $\text{ACh}$", "Binds $\text{Ca}^{2+}$ to move tropomyosin", "Provides $\text{ATP}$"],
+                answer: "Binds $\text{Ca}^{2+}$ to move tropomyosin",
+                hint: "This protein complex acts as the regulatory switch.",
+            },
+            {
+                question: "The energy pathway that yields the least amount of $\text{ATP}$ and is used only for very short bursts of activity is:",
+                options: ["Glycolysis", "Aerobic Metabolism", "Creatine Phosphate Metabolism", "$\text{Kreb}'\text{s}$ Cycle"],
+                answer: "Creatine Phosphate Metabolism",
+                hint: "This reservoir of energy is depleted rapidly, typically within seconds.",
+            },
+            {
+                question: "What is the characteristic appearance of Cardiac Muscle tissue under a microscope?",
+                options: ["Smooth and elongated", "Striated with multiple nuclei", "Striated with intercalated discs", "Non-striated and spindle-shaped"],
+                answer: "Striated with intercalated discs",
+                hint: "The intercalated discs are unique features that allow the heart cells to communicate quickly.",
+            },
+            {
+                question: "Which of the following is a function of the $\text{ACh}$ receptor on the muscle fiber membrane?",
+                options: ["To release $\text{Ca}^{2+}$", "To bind the neurotransmitter", "To break down $\text{ACh}$", "To produce $\text{ATP}$"],
+                answer: "To bind the neurotransmitter",
+                hint: "Binding of the $\text{ACh}$ molecules opens ion channels and initiates the action potential.",
+            },
+            {
+                question: "What type of muscle contraction occurs when tension increases but the muscle length remains the same?",
+                options: ["Isotonic", "Concentric", "Eccentric", "Isometric"],
+                answer: "Isometric",
+                hint: "This contraction is important for maintaining posture or holding a heavy object stationary.",
+            },
+            {
+                question: "Which part of the muscle-aging process is directly associated with a required immediate financial attention?",
+                options: ["Muscle Tone decline", "Decrease in maximum strength", "Sarcopenia onset", "Aging itself is not a cause of financial issues"],
+                answer: "Aging itself is not a cause of financial issues",
+                hint: "The provided text on aging focuses on physiological decline, not financial status.",
+            },
+            {
+                question: "What term describes the condition where abnormal fibrous tissue forms in a muscle, fixing it in a flexed position?",
+                options: ["Atrophy", "Contracture", "Myasthenia Gravis", "Dystrophy"],
+                answer: "Contracture",
+                hint: "This is often a result of muscle underuse or paralysis.",
+            },
+            {
+                question: "Which muscle is essential for stabilizing joints and supporting soft tissues?",
+                options: ["Adductor Longus", "All skeletal muscles", "Gluteus Maximus only", "Temporalis"],
+                answer: "All skeletal muscles",
+                hint: "Stabilization is a key secondary function of most muscles, acting to brace bone connections.",
+            },
+            {
+                question: "Which muscle is named for its location (pectoralis) and the direction of its fibers (major)?",
+                options: ["Rectus Abdominis", "Trapezius", "Pectoralis Major", "Deltoid"],
+                answer: "Pectoralis Major",
+                hint: "The large muscle of the chest has fibers running in various directions to allow multiple movements.",
+            },
+            {
+                question: "What is the function of the Orbicularis Oculi?",
+                options: ["Close the jaw", "Raise the eyelid", "Wink and squint", "Purse the lips"],
+                answer: "Wink and squint",
+                hint: "It acts as a sphincter around the eye.",
+            },
+            {
+                question: "Which abdominal muscle assists in the lateral flexion and rotation of the trunk?",
+                options: ["Rectus Abdominis", "External Oblique", "Diaphragm", "Transversus Abdominis"],
+                answer: "External Oblique",
+                hint: "The oblique muscles are crucial for these twisting and side-bending movements.",
+            },
+            {
+                question: "The primary action of the Teres Major muscle is to:",
+                options: ["Extend the elbow", "Abduct the arm", "Raise the shoulder", "Extend the arm at the shoulder joint"],
+                answer: "Extend the arm at the shoulder joint",
+                hint: "This muscle works synergistically with the Latissimus Dorsi.",
+            },
+            {
+                question: "The primary function of the muscles that flexors and extensors of the wrist, hand, and fingers is to provide:",
+                options: ["Grasping and dexterity", "Heat generation", "Shoulder rotation", "Arm extension"],
+                answer: "Grasping and dexterity",
+                hint: "These muscles are responsible for fine motor control.",
+            },
+            {
+                question: "Which muscle's fibers run straight down the thigh, allowing it to be named 'Rectus'?",
+                options: ["Vastus Lateralis", "Sartorius", "Rectus Femoris", "Biceps Femoris"],
+                answer: "Rectus Femoris",
+                hint: "The word 'rectus' means straight.",
+            },
+            {
+                question: "Which of the following is an injection site in the gluteal region?",
+                options: ["Gluteus Maximus", "Gluteus Medius", "Adductor Longus", "Sartorius"],
+                answer: "Gluteus Medius",
+                hint: "This site is preferred over the maximus to avoid the sciatic nerve.",
+            },
+            {
+                question: "The Tibialis Anterior, Peroneus Longus, Gastrocnemius, and Soleus are all muscles of the:",
+                options: ["Thigh", "Arm", "Leg/Foot", "Trunk"],
+                answer: "Leg/Foot",
+                hint: "These muscles control movement below the knee.",
+            },
+            {
+                question: "What does the Latin term 'Vastus' (as in Vastus Lateralis) imply about the muscle?",
+                options: ["Narrow", "Long", "Huge or immense", "Circular"],
+                answer: "Huge or immense",
+                hint: "It refers to the large size of the muscle.",
+            },
+            {
+                question: "Which substance is necessary for exposing the binding sites on actin so that myosin can attach?",
+                options: ["$\text{ACh}$", "Creatine Phosphate", "Calcium ($\text{Ca}^{2+}$)", "$\text{ATP}$"],
+                answer: "Calcium ($\text{Ca}^{2+}$)",
+                hint: "This ion initiates the chemical cascade of contraction.",
+            },
+            {
+                question: "The loss of muscle mass in old age is known as sarcopenia, which is a decline in:",
+                options: ["$\text{ACh}$ production", "Strength and functional mass", "Creatine Phosphate stores only", "Number of motor units only"],
+                answer: "Strength and functional mass",
+                hint: "The decline affects overall ability and physical capacity.",
+            },
+            {
+                question: "The tough membrane that surrounds the entire skeletal muscle is the:",
+                options: ["Perimysium", "Endomysium", "Epimysium", "Tendon"],
+                answer: "Epimysium",
+                hint: "Epi- means 'upon' or 'over'.",
+            },
+            {
+                question: "A neurotoxin that causes sustained muscle contractions by blocking inhibitory signals is associated with:",
+                options: ["Botulism", "Myasthenia Gravis", "Curare", "Tetanus"],
+                answer: "Tetanus",
+                hint: "This leads to severe muscle spasms and 'lockjaw'.",
+            },
+            {
+                question: "Glycolysis and Creatine Phosphate metabolism are both forms of:",
+                options: ["Aerobic energy production", "Anaerobic energy production", "Long-term energy storage", "Fatty acid breakdown"],
+                answer: "Anaerobic energy production",
+                hint: "These processes do not require oxygen.",
+            },
+            {
+                question: "What term describes the continuous stimulation that causes a constant, low-level muscle contraction, important for posture?",
+                options: ["Muscle Twitch", "Tetanus", "Muscle Tone", "Recruitment"],
+                answer: "Muscle Tone",
+                hint: "This involuntary state keeps muscles prepared for movement.",
+            },
+            {
+                question: "The primary action of the Tibialis Anterior is to pull the foot up towards the shin, which is:",
+                options: ["Plantar Flexion", "Eversion", "Inversion", "Dorsiflexion"],
+                answer: "Dorsiflexion",
+                hint: "This muscle is located on the front of the shin.",
+            },
+            {
+                question: "Which of the following describes the smooth muscle tissue?",
+                options: ["Striated and Voluntary", "Striated and Involuntary", "Non-striated and Voluntary", "Non-striated and Involuntary"],
+                answer: "Non-striated and Involuntary",
+                hint: "It controls slow, sustained contractions in internal organs.",
+            },
+            {
+                question: "The ability of muscle tissue to return to its original length after being stretched is called:",
+                options: ["Extensibility", "Elasticity", "Contractility", "Excitability"],
+                answer: "Elasticity",
+                hint: "The property of stretching is extensibility; this property is for returning to rest.",
+            },
+            {
+                question: "The most important factor in distinguishing Cardiac Muscle from Skeletal Muscle is the presence of:",
+                options: ["Myofibrils", "Nuclei", "Intercalated Discs", "Endomysium"],
+                answer: "Intercalated Discs",
+                hint: "These structures allow for rapid spread of electrical impulses.",
+            },
+            {
+                question: "What is the functional term for a muscle that stabilizes the origin of the prime mover?",
+                options: ["Antagonist", "Synergist", "Agonist", "Fixator"],
+                answer: "Fixator",
+                hint: "A fixator prevents unwanted movement at the joint to allow the prime mover to be more effective.",
+            },
+            {
+                question: "The muscle responsible for pursing the lips, as in kissing or pouting, is the:",
+                options: ["Zygomaticus", "Buccinator", "Orbicularis Oris", "Frontalis"],
+                answer: "Orbicularis Oris",
+                hint: "Its circular fibers surround the mouth opening.",
+            },
+            {
+                question: "The $\text{Iliopsoas}$ muscle (not shown in detail) is an antagonist to which major muscle group?",
+                options: ["Hamstrings", "Quadriceps", "Erector Spinae", "Diaphragm"],
+                answer: "Hamstrings",
+                hint: "The Iliopsoas is the primary hip flexor, and the hamstrings are hip extensors.",
+            },
+            {
+                question: "Which abdominal muscle is closest to the midline and contains tendinous intersections ('six-pack')?",
+                options: ["Internal Oblique", "External Oblique", "Transversus Abdominis", "Rectus Abdominis"],
+                answer: "Rectus Abdominis",
+                hint: "It is the long, straight muscle running down the center of the abdomen.",
+            },
+            {
+                question: "The condition $\text{Carpal}$ Tunnel Syndrome directly results from compression of the:",
+                options: ["Ulnar Nerve", "Radial Artery", "Median Nerve", "Flexor Tendons"],
+                answer: "Median Nerve",
+                hint: "Pressure on this nerve causes weakness and tingling in the hand.",
+            }
+        ];
+        
+        // --- GLOBAL STATE ---
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let isAnswered = false;
+        
+        const quizContainer = document.getElementById('quiz-container');
+
+        // --- CORE FUNCTIONS ---
+
+        function renderQuestion() {
+            if (currentQuestionIndex >= quizData.length) {
+                renderResults();
+                return;
+            }
+
+            const data = quizData[currentQuestionIndex];
+            isAnswered = false;
+
+            // Generate unique IDs for options to ensure proper label/input association
+            const uniqueIdPrefix = 'q' + currentQuestionIndex; 
+            
+            const optionsHtml = data.options.map((option, index) => {
+                const optionId = uniqueIdPrefix + index;
+                return `
+                    <button 
+                        class="option-button w-full text-left p-4 my-2 border-2 border-gray-300 rounded-lg text-gray-700 font-medium disabled:opacity-75 disabled:cursor-not-allowed hover:bg-gray-100 focus:outline-none"
+                        data-option="${option}"
+                        onclick="handleAnswer(this, '${data.answer.replace(/'/g, "\\'")}')"
+                        id="${optionId}"
+                    >
+                        ${option}
+                    </button>
+                `;
+            }).join('');
+
+            const content = `
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center text-gray-500">
+                        <p class="text-sm font-semibold">Question ${currentQuestionIndex + 1} of ${quizData.length}</p>
+                        <p class="text-sm font-semibold">Score: ${score}</p>
+                    </div>
+
+                    <div class="h-2 bg-gray-200 rounded-full">
+                        <div class="h-2 bg-blue-500 rounded-full transition-all duration-500" style="width: ${((currentQuestionIndex) / quizData.length) * 100}%;"></div>
+                    </div>
+                    
+                    <h2 class="text-xl md:text-2xl font-bold text-gray-800">${data.question}</h2>
+                    
+                    <div id="options-container" class="space-y-2">
+                        ${optionsHtml}
+                    </div>
+
+                    <div id="feedback-container" class="min-h-[6rem] p-4 rounded-lg hidden transition-all duration-300">
+                        <!-- Feedback and hint will appear here -->
+                    </div>
+
+                    <button 
+                        id="next-button" 
+                        onclick="nextQuestion()" 
+                        class="hidden w-full py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition duration-200 focus:outline-none focus:ring-4 focus:ring-blue-300"
+                    >
+                        ${currentQuestionIndex === quizData.length - 1 ? 'View Results' : 'Next Question &rarr;'}
+                    </button>
+                </div>
+            `;
+
+            quizContainer.innerHTML = content;
+        }
+
+        function handleAnswer(selectedButton, correctAnswer) {
+            if (isAnswered) return; // Prevent double-clicking
+            isAnswered = true;
+
+            const selectedOption = selectedButton.getAttribute('data-option');
+            const isCorrect = selectedOption === correctAnswer;
+            const feedbackContainer = document.getElementById('feedback-container');
+            const nextButton = document.getElementById('next-button');
+            
+            // Disable all buttons and apply selected class
+            document.querySelectorAll('.option-button').forEach(btn => {
+                btn.disabled = true;
+                if (btn === selectedButton) {
+                    btn.classList.add('selected');
+                }
+            });
+
+            // Update UI based on correctness
+            const currentQuestion = quizData[currentQuestionIndex];
+            
+            if (isCorrect) {
+                score++;
+                selectedButton.classList.add('correct');
+                feedbackContainer.classList.remove('bg-red-100', 'text-red-700');
+                feedbackContainer.classList.add('bg-emerald-100', 'text-emerald-700');
+                feedbackContainer.innerHTML = `<p class="font-bold">Correct!</p><p>${currentQuestion.hint}</p>`;
+            } else {
+                selectedButton.classList.add('incorrect');
+                // Find and highlight the correct answer
+                document.querySelectorAll('.option-button').forEach(btn => {
+                    if (btn.getAttribute('data-option') === correctAnswer) {
+                        btn.classList.remove('selected');
+                        btn.classList.add('correct');
+                    }
+                });
+                
+                feedbackContainer.classList.remove('bg-emerald-100', 'text-emerald-700');
+                feedbackContainer.classList.add('bg-red-100', 'text-red-700');
+                feedbackContainer.innerHTML = `<p class="font-bold">Incorrect. The correct answer was: ${correctAnswer}.</p><p>${currentQuestion.hint}</p>`;
+            }
+            
+            feedbackContainer.classList.remove('hidden');
+            nextButton.classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            renderQuestion();
+        }
+
+        function renderResults() {
+            const percentage = (score / quizData.length) * 100;
+            let message = '';
+            let emoji = '';
+            let resultColor = 'text-gray-800';
+
+            if (percentage >= 90) {
+                message = "Exceptional result! You have a masterful understanding of muscle anatomy.";
+                emoji = '🏆';
+                resultColor = 'text-green-600';
+            } else if (percentage >= 70) {
+                message = "Very strong performance! A great grasp of the material, review your missed topics for perfection.";
+                emoji = '👍';
+                resultColor = 'text-yellow-600';
+            } else if (percentage >= 50) {
+                message = "Solid effort. You've got the basics down, but focus on the specific names and actions.";
+                emoji = '🧠';
+                resultColor = 'text-orange-600';
+            } else {
+                message = "Keep studying! A full review of all muscle groups and contraction principles is recommended.";
+                emoji = '📚';
+                resultColor = 'text-red-600';
+            }
+
+            const content = `
+                <div class="text-center py-10 space-y-6">
+                    <p class="text-6xl">${emoji}</p>
+                    <h2 class="text-3xl font-bold ${resultColor}">100-Question Test Complete!</h2>
+                    <p class="text-lg text-gray-700">You answered <span class="font-extrabold text-2xl">${score}</span> out of ${quizData.length} questions correctly.</p>
+                    <p class="text-4xl font-black ${resultColor}">${percentage.toFixed(1)}%</p>
+                    <p class="text-lg text-gray-600">${message}</p>
+                    
+                    <button 
+                        onclick="resetQuiz()" 
+                        class="w-full py-3 mt-8 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition duration-200 focus:outline-none focus:ring-4 focus:ring-blue-300"
+                    >
+                        Restart Test
+                    </button>
+                </div>
+            `;
+
+            quizContainer.innerHTML = content;
+        }
+
+        function resetQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            renderQuestion();
+        }
+
+        // Initialize the quiz on load
+        window.onload = renderQuestion;
+
+    </script>
+</body>
+</html>
